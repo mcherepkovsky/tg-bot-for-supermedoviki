@@ -1,6 +1,6 @@
+import io
 import qrcode
 from PIL import Image
-
 
 class QRGen:
     def __init__(self, id):
@@ -10,7 +10,7 @@ class QRGen:
             box_size=10,
             border=1,
         )
-        self.background = Image.open("img/card.png")
+        self.background = Image.open("tg_bot_for_supermedoviki/img/card.png")
         self.qr_img = None
         self.position = None
         self.id = id
@@ -23,7 +23,7 @@ class QRGen:
         qr_gen.create_qr()
         qr_gen.position_qr()
         qr_gen.paste_qr()
-        qr_gen.save_image()
+        return qr_gen.save_image()
 
     def create_qr(self):
         """Создает QR-код на основе данных."""
@@ -44,9 +44,7 @@ class QRGen:
         self.background.paste(self.qr_img, self.position)
 
     def save_image(self):
-        """Сохраняет итоговое изображение."""
-        self.background.save(f"result_card_{self.id}.png")
-
-
-# Пример использования статического метода
-QRGen.generate(id=12345)
+        """Сохраняет итоговое изображение как байты."""
+        img_byte_arr = io.BytesIO()
+        self.background.save(img_byte_arr, format='PNG')
+        return img_byte_arr.getvalue()

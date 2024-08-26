@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "tg-bot-for-supermedoviki-aio"
+version = "0.1.0"
+description = ""
+authors = ["Maks-Diablo <v16111980@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aiogram = "^3.12.0"
+pydantic-settings = "^2.4.0"
+peewee = "^3.17.6"
+qrcode = {extras = ["pil"], version = "^7.4.2"}
+pillow = "^10.4.0"
+psycopg2-binary = "^2.9.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

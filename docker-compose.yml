@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  telegram-bot:
+    container_name: telegram-bot-supermedoviki
+    env_file:
+      - .env
+    restart: always
+    build: .
+    command: poetry run python tg_bot_for_supermedoviki/bot.py
+    depends_on:
+      - postgres
+    networks:
+      - my_network
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres-supermedoviki
+    environment:
+      POSTGRES_USER: ${USER}
+      POSTGRES_PASSWORD: ${PASSWORD}
+      POSTGRES_DB: ${DATABASE}
+    ports:
+      - "5433:5432"  # Хостовый порт 5433, перенаправляемый на контейнерный порт 5432
+    volumes:
+      - ./data/db/postgres:/var/lib/postgresql/data
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

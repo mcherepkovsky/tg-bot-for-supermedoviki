@@ -1,6 +1,7 @@
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
-from .. db.models import Users
+
+from ..db.models import Users
 
 USER_EXIST = lambda tg_id: Users.select().where(Users.tg_id == tg_id).exists()
 

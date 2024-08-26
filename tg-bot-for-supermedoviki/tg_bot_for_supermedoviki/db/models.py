@@ -1,6 +1,5 @@
+from config_reader import config
 from peewee import Model, PrimaryKeyField, PostgresqlDatabase, CharField, IntegerField, BlobField, ForeignKeyField
-
-from .. config_reader import config
 
 db = PostgresqlDatabase(
     host=config.host.get_secret_value(),

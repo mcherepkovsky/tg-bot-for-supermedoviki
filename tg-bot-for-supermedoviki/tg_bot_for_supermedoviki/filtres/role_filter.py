@@ -2,8 +2,7 @@ from typing import Any
 
 from aiogram import types
 from aiogram.filters import BaseFilter
-
-from .. db.models import Users
+from db.models import Users
 
 
 class RoleFilter(BaseFilter):
@@ -22,6 +21,8 @@ class RoleFilter(BaseFilter):
         except Users.DoesNotExist:
             position_title = "Guest"
             return position_title  # User not found in database
-
+        except Exception:
+            position_title = "Guest"
+            return position_title  # User not found in database
         # Check if the user's position matches the required role
         return position_title == self.role

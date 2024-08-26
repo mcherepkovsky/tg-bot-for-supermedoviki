@@ -2,16 +2,15 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
-from aiogram.filters import Command
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import BotCommand, Message
+from aiogram.types import BotCommand
 
 from config_reader import config
-
-from handlers.common import common_router
-from handlers.client import client_router
-from handlers.admin import admin_router
 from filtres.role_filter import RoleFilter
+from handlers.admin import admin_router
+from handlers.client import client_router
+from handlers.common import common_router
+
 
 async def main():
     logging.basicConfig(

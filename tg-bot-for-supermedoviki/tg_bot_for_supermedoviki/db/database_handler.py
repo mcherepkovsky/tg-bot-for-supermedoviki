@@ -2,7 +2,8 @@ import logging
 
 from peewee import IntegrityError, DoesNotExist
 
-from models import *
+from client_card.qrbackgen import QRGen
+from db.models import Users, Positions
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -37,14 +38,29 @@ async def get_all_employees_list_from_db(positions):
         return ["Список пуст."]
 
 
+async def get_user_personal_qr_code(user_data):
+    tg_id = user_data.get('tg_id')
+    try:
+        user = Users.get(Users.tg_id == tg_id)
+        return user.personalQRCode
+    except Exception:
+        logger.error(f"Пользователь {tg_id} не найден.")
+        user = await add_user(user_data)
+        return user.personalQRCode
+
+
 async def add_user(user_data):
     try:
+        # Генерация QR-кода
+        qr_image_bytes = QRGen.generate(id=user_data.get('tg_id'))
+        print(qr_image_bytes)
+        # Создание записи пользователя с сохранением QR-кода
         user = Users.create(
             tg_id=user_data.get('tg_id'),
             tg_username=user_data.get('tg_username'),
-            personalQRCode=None #вызов генератора
+            personalQRCode=qr_image_bytes  # Сохранение байтового представления QR-кода
         )
-        logger.info(f"Пользователь {user.tg_id} успешно добавлен.")
+        logger.info(f"Пользователь {user.tg_id} успешно добавлен. || {qr_image_bytes}")
         return user
     except IntegrityError:
         logger.error(f"Пользователь {user_data.get('tg_id')} уже существует.")
