@@ -2,6 +2,7 @@ import io
 import qrcode
 from PIL import Image
 
+
 class QRGen:
     def __init__(self, id):
         self.qr = qrcode.QRCode(
@@ -10,7 +11,7 @@ class QRGen:
             box_size=10,
             border=1,
         )
-        self.background = Image.open("tg_bot_for_supermedoviki/img/card.png")
+        self.background = Image.open("tg_bot_for_supermedoviki/resources/card.png")
         self.qr_img = None
         self.position = None
         self.id = id

@@ -6,7 +6,7 @@ from PIL import Image
 class AddMark:
     def __init__(self, user_id):
         self.user_id = user_id
-        self.mark = Image.open("img/card_mark.png")
+        self.mark = Image.open("resources/card_mark.png")
         self.random_angle = randint(-70, 70)  # Генерирует случайный угол от 0 до 360 градусов
         self.user_card = Image.open("result_card_12345.png")
         self.coffe_number = 7

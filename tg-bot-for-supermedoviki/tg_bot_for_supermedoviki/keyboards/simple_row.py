@@ -1,10 +1,34 @@
 from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton
 
 
+def menu_keyboard():
+    menu_button = [
+        [{'text': '🥮 Медовики',
+          'callback_data': "getMedoviki"},
+         {'text': '🍮 Десерты',
+          'callback_data': "getDesserts"}
+         ],
+        [{'text': '☕ Кофе',
+          'callback_data': "getCoffe"},
+         {'text': '🥤 Некофе',
+          'callback_data': "getNekofe"},
+         {'text': '🍵 Чай',
+          'callback_data': "getTea"}
+         ],
+        [{'text': '🍰 Торты на заказ 🍰',
+          'callback_data': "getCakesToOrder"}
+         ],
+        [{'text': '➕ Добавки ➕',
+          'callback_data': "getAdditives"}
+         ],
+    ]
+    return menu_button
+
+
 def admin_keyboard():
     first_button = [
         [KeyboardButton(text="📢 Рассылка")],
-        [KeyboardButton(text="🔍 Редактировать меню")],
+        [KeyboardButton(text="✏️ Редактировать меню")],
     ]
     markup = ReplyKeyboardMarkup(keyboard=first_button, resize_keyboard=True)
     return markup
@@ -12,8 +36,8 @@ def admin_keyboard():
 
 def client_keyboard():
     first_button = [
-        [KeyboardButton(text="🔍 Моя карта")],
-        [KeyboardButton(text="🔍 Меню")]
+        [KeyboardButton(text="💳 Моя карта")],
+        [KeyboardButton(text="📋 Меню")]
     ]
     markup = ReplyKeyboardMarkup(keyboard=first_button, resize_keyboard=True)
     return markup

@@ -1,3 +1,4 @@
+import logging
 from io import BytesIO
 
 from aiogram import Router
@@ -8,32 +9,71 @@ from aiogram.types import Message, ReplyKeyboardRemove, InputFile, BufferedInput
 from filtres.role_filter import RoleFilter
 from keyboards.simple_row import client_keyboard, admin_keyboard
 from services.message_deleter import delete_messages
-from db.database_handler import get_user_personal_qr_code
+from handlers.client import send_user_qr_code
+from db.database_handler import get_user_coffe_number
+from db.database_handler import update_coffe_number
 
 
 common_router = Router()
 
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 @common_router.message(
     Command(commands=["start"]),
+    RoleFilter(role='Guest')
 )
 async def cmd_start(message: Message, state: FSMContext):
-    if await RoleFilter('Guest')(message):
-        await start_message_main_guest(message, state)
-    else:
-        if RoleFilter('Client'):
-            keyboard = client_keyboard()
-        elif RoleFilter('Administrator'):
-            keyboard = admin_keyboard()
+    await start_message_main_guest(message, state)
+
+
+@common_router.message(
+    Command(commands=["start"]),
+    RoleFilter(role='Client')
+)
+async def cmd_start(message: Message, state: FSMContext):
+    await start_message_main_guest(message, state)
+
+
+@common_router.message(
+    Command(commands=["start"]),
+    RoleFilter(role='Administrator')
+)
+async def cmd_start(message: Message, state: FSMContext):
+    await start_message_main_admin(message)
+
+# async def start_message_main_client(message: Message):
+#     await message.answer(
+#         text=f"Вы находитесь в <b>Главном меню</b>.\nВыберите действие 👇",
+#         parse_mode='HTML',
+#         reply_markup=client_keyboard()
+#     )
+
+
+async def start_message_main_admin(message: Message):
+    full_text = message.text
+    command, *args = full_text.split()
+
+    if args:
+        coffe_number = await get_user_coffe_number(args[0])
+        if coffe_number is not None:
+            text = f"QR-код клиента <i>{args[0]}</i> <b>принят</b>.\nСтатус <b>{coffe_number + 1}/8</b> кофе."
+            await update_coffe_number(args[0])
         else:
-            keyboard = ReplyKeyboardRemove()
+            text = f"Пользователь с ID <i>{args[0]}</i> не найден."
+    else:
+        text = f"Вы находитесь в <b>Главном меню</b>."
 
-        await message.reply(f"Приветствую.", parse_mode='HTML')
-        await message.answer("Выберите действие 👇",
-                             reply_markup=keyboard,
-                             disable_notification=True)
+    await message.answer(
+        text=text,
+        parse_mode='HTML',
+        reply_markup=admin_keyboard()
+    )
 
 
+
+
+# вызов по нажатию на Информация
 async def start_message_main_guest(message: Message, state: FSMContext):
     text = "👋 Добро пожаловать в <b>Super Medovik!</b> Мы рады видеть вас среди наших гостей.\n\n" \
            "🎂 У нас вы можете насладиться классическими и оригинальными вкусами медовиков, приготовленных вручную по советскому рецепту. " \
@@ -49,15 +89,7 @@ async def start_message_main_guest(message: Message, state: FSMContext):
         reply_markup=keyboard_remove
     )
 
-    await state.update_data(
-        tg_id=message.from_user.id,
-        tg_username=message.from_user.username
-    )
-    user_data = await state.get_data()
-
-    caption = "🔗 Вот ваша бонусная карточка с QR-кодом, чтобы начать участие в программе:"
-
-    await send_user_qr_code(message, user_data, caption)
+    await send_user_qr_code(message, state)
 
     text = "📍 <b>Наши адреса: </b>\n" \
            "• Якуба Коласа, 25/1\n" \
@@ -72,42 +104,9 @@ async def start_message_main_guest(message: Message, state: FSMContext):
     )
 
 
-async def send_user_qr_code(message, user_data, caption):
-    # Получаем QR-код из базы данных
-    qrCode = await get_user_personal_qr_code(user_data)
-    if qrCode:
-        # Преобразуем байты в InputFile для отправки фото
-        photo = BufferedInputFile(qrCode, filename='qr_code.png')
-
-        # Отправляем фото
-        await message.answer_photo(
-            photo=photo,
-            caption=caption,
-            show_caption_above_media=True,
-            disable_notification=True,
-            parse_mode='HTML'
-        )
-    else:
-        await message.reply("QR-код не найден.")
 
 
 
 async def handle_unhandled_message(message: Message):
     message_ids_to_delete = [message.message_id - i for i in range(1)]
     await delete_messages(message.chat.id, message_ids_to_delete)
-
-
-async def start_message_main_client(message: Message):
-    await message.answer(
-        text=f"Вы находитесь в <b>Главном меню</b>.\nВыберите действие 👇",
-        parse_mode='HTML',
-        reply_markup=client_keyboard()
-    )
-
-
-async def start_message_main_admin(message: Message):
-    await message.answer(
-        text=f"Вы находитесь в <b>Главном меню</b>.\nВыберите действие 👇",
-        parse_mode='HTML',
-        reply_markup=admin_keyboard()
-    )

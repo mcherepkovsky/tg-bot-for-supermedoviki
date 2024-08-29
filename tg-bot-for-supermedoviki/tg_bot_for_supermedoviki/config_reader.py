@@ -1,5 +1,6 @@
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import json
 
 
 class Settings(BaseSettings):
@@ -23,3 +24,8 @@ class Settings(BaseSettings):
 # и провалидируется объект конфига,
 # который можно далее импортировать из разных мест
 config = Settings()
+
+
+# Чтение файла JSON с меню
+with open('tg_bot_for_supermedoviki/resources/menu.json', 'r', encoding='utf-8') as file:
+    menu_data = json.load(file)

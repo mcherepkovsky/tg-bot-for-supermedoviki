@@ -26,7 +26,7 @@ async def main():
     dp.include_router(common_router)
     dp.include_router(client_router)
     dp.include_router(admin_router)
-    
+
     client_router.message.filter(RoleFilter(role='Client'))
     admin_router.message.filter(RoleFilter(role='Administrator'))
 
@@ -55,6 +55,7 @@ async def set_main_menu(bot: Bot):
     ]
 
     await bot.set_my_commands(main_menu_commands)
+
 
 if __name__ == '__main__':
     asyncio.run(main())

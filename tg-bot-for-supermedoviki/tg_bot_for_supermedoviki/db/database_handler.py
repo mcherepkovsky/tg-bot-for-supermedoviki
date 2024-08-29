@@ -49,11 +49,19 @@ async def get_user_personal_qr_code(user_data):
         return user.personalQRCode
 
 
+async def get_user_coffe_number(tg_id):
+    try:
+        user = Users.get(Users.tg_id == tg_id)
+        return user.coffe_number
+    except Exception:
+        logger.error(f"Пользователь {tg_id} не найден.")
+        return None
+
+
 async def add_user(user_data):
     try:
         # Генерация QR-кода
         qr_image_bytes = QRGen.generate(id=user_data.get('tg_id'))
-        print(qr_image_bytes)
         # Создание записи пользователя с сохранением QR-кода
         user = Users.create(
             tg_id=user_data.get('tg_id'),
@@ -65,6 +73,20 @@ async def add_user(user_data):
     except IntegrityError:
         logger.error(f"Пользователь {user_data.get('tg_id')} уже существует.")
         return None
+
+
+async def update_coffe_number(tg_id):
+    try:
+        user = Users.get(Users.tg_id == tg_id)
+
+        user.coffe_number += 1
+        user.save()
+
+        logger.info(f"Coffe_number пользователя {tg_id} успешно обновлён на '{user.coffe_number}'.")
+        return True
+    except DoesNotExist:
+        logger.error(f"Пользователь с TG_ID {tg_id} не найден.")
+        return False
 
 
 async def update_position_id(tg_id, position_title):
