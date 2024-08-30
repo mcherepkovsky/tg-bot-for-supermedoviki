@@ -62,15 +62,18 @@ async def start_message_main_admin(message: Message):
         else:
             text = f"Пользователь с ID <i>{args[0]}</i> не найден."
     else:
-        text = f"Вы находитесь в <b>Главном меню</b>."
+        await start_message_main_admin_null(message)
+
+
+async def start_message_main_admin_null(message: Message):
+
+    text = f"Вы находитесь в <b>Главном меню</b>."
 
     await message.answer(
         text=text,
         parse_mode='HTML',
         reply_markup=admin_keyboard()
     )
-
-
 
 
 # вызов по нажатию на Информация

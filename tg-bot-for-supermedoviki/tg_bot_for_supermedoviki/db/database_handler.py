@@ -9,33 +9,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-async def get_all_employees_list_from_db(positions):
+async def get_all_employees_from_db():
     try:
-        query = Users.select().join(Positions).where(Positions.title.in_(positions))
-        # Выполнение запроса и вывод результатов
-        employees = query.execute()
-        employees_list = ''
-        employees_arr = []
-
-        for index, employee in enumerate(employees, start=1):
-            if employee.tg_username:
-                # Формируем ссылку, если tg_firstname не null
-                employees_list += f"<a href='https://t.me/{employee.tg_username}'>{index}. {employee.tg_id}</a>\n"
-            else:
-                # Если tg_firstname отсутствует, просто выводим текст без ссылки
-                employees_list += f"{index}. {employee.tg_id}\n"
-
-            if index % 20 == 0:
-                employees_arr.append(employees_list)
-                employees_list = ''
-
-        # Добавляем оставшиеся элементы, если они есть
-        if employees_list:
-            employees_arr.append(employees_list)
-
-        return employees_arr
+        employees = Users.select().join(Positions).where(Positions.title.in_(["Administrator", "Client"]))
+        return employees
     except DoesNotExist:
-        return ["Список пуст."]
+        return None
 
 
 async def get_user_personal_qr_code(user_data):

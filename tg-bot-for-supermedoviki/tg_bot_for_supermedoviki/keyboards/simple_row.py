@@ -29,6 +29,7 @@ def admin_keyboard():
     first_button = [
         [KeyboardButton(text="📢 Рассылка")],
         [KeyboardButton(text="✏️ Редактировать меню")],
+        [KeyboardButton(text="🎭 Изменить роль пользователя")],
     ]
     markup = ReplyKeyboardMarkup(keyboard=first_button, resize_keyboard=True)
     return markup
