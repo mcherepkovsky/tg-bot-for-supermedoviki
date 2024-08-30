@@ -1,9 +1,12 @@
 import logging
+from io import BytesIO
 
+from PIL import Image
 from peewee import IntegrityError, DoesNotExist
 
 from client_card.qrbackgen import QRGen
 from db.models import Users, Positions
+from client_card.addMark import AddMark
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -51,6 +54,31 @@ async def add_user(user_data):
         return user
     except IntegrityError:
         logger.error(f"Пользователь {user_data.get('tg_id')} уже существует.")
+        return None
+
+
+async def update_user_qr(tg_id, coffe_number):
+    try:
+        # Поиск пользователя по tg_id
+        user = Users.get(tg_id=tg_id)
+        if user:
+            # Генерация нового QR-кода
+            logger.error(type(user.personalQRCode))
+            image_bytes = user.personalQRCode.tobytes()
+            image_stream = BytesIO(image_bytes)
+            old_qr_image = Image.open(image_stream)
+            new_qr_image = AddMark.generate(tg_id, coffe_number,  old_qr_image)
+
+            # Обновление QR-кода пользователя
+            user.personalQRCode = new_qr_image
+            user.save()  # Сохранение изменений в базе данных
+            logger.info(f"QR-код для пользователя {tg_id} успешно обновлен.")
+            return new_qr_image
+        else:
+            logger.error(f"Пользователь с tg_id {tg_id} не найден.")
+            return None
+    except Exception as e:
+        logger.error(f"Ошибка при обновлении QR-кода пользователя: {e}")
         return None
 
 

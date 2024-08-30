@@ -5,9 +5,7 @@ from aiogram.types import Message
 
 from services.information_handlers import information_message_admin, information_message_success, \
     information_message_entry
-from keyboards.simple_row import admin_keyboard
 from handlers.common import start_message_main_admin_null
-
 
 admin_router = Router()
 

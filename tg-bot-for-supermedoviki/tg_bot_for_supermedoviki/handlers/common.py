@@ -11,14 +11,15 @@ from keyboards.simple_row import client_keyboard, admin_keyboard
 from services.message_deleter import delete_messages
 from handlers.client import send_user_qr_code
 from db.database_handler import get_user_coffe_number
-from db.database_handler import update_coffe_number
-
+from db.database_handler import update_coffe_number, update_user_qr
+from services.sender import send_qr_code_to_client
 
 common_router = Router()
 
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
 @common_router.message(
     Command(commands=["start"]),
     RoleFilter(role='Guest')
@@ -40,7 +41,8 @@ async def cmd_start(message: Message, state: FSMContext):
     RoleFilter(role='Administrator')
 )
 async def cmd_start(message: Message, state: FSMContext):
-    await start_message_main_admin(message)
+    await start_message_main_admin(message, state)
+
 
 # async def start_message_main_client(message: Message):
 #     await message.answer(
@@ -50,7 +52,7 @@ async def cmd_start(message: Message, state: FSMContext):
 #     )
 
 
-async def start_message_main_admin(message: Message):
+async def start_message_main_admin(message: Message, state: FSMContext):
     full_text = message.text
     command, *args = full_text.split()
 
@@ -59,16 +61,18 @@ async def start_message_main_admin(message: Message):
         if coffe_number is not None:
             text = f"QR-код клиента <i>{args[0]}</i> <b>принят</b>.\nСтатус <b>{coffe_number + 1}/8</b> кофе."
             await update_coffe_number(args[0])
+            # отправка карточки клиенту
+            new_qr_image = await update_user_qr(args[0], coffe_number)
+            caption = f"Ваша бонусная карточка успешно принята! 🎉\nНа данный момент у вас собрано <b>{coffe_number + 1} из 8</b> кофе.\n" \
+                      f"Еще немного, и вы сможете получить бесплатный напиток! 😍"
+            await send_qr_code_to_client(args[0], caption, new_qr_image)
         else:
             text = f"Пользователь с ID <i>{args[0]}</i> не найден."
-    else:
-        await start_message_main_admin_null(message)
+
+        await start_message_main_admin_null(message, text=text)
 
 
-async def start_message_main_admin_null(message: Message):
-
-    text = f"Вы находитесь в <b>Главном меню</b>."
-
+async def start_message_main_admin_null(message: Message, text=f"Вы находитесь в <b>Главном меню</b>."):
     await message.answer(
         text=text,
         parse_mode='HTML',
@@ -105,9 +109,6 @@ async def start_message_main_guest(message: Message, state: FSMContext):
         parse_mode='HTML',
         reply_markup=client_keyboard()
     )
-
-
-
 
 
 async def handle_unhandled_message(message: Message):

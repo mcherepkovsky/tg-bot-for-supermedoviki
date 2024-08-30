@@ -6,19 +6,22 @@ from db.database_handler import get_user_personal_qr_code
 from aiogram.types import Message, ReplyKeyboardRemove, InputFile, BufferedInputFile
 from keyboards.simple_row import make_row_inline_keyboard_mutiple, make_row_inline_keyboard, menu_keyboard
 from config_reader import config, menu_data  # Импортируем config и menu_data
+from services.sender import send_qr_code_to_client
 
 client_router = Router()
 
 
 @client_router.message(F.text.lower() == "💳 моя карта")
-async def send_user_qr_code(message: Message, state: FSMContext):
+async def send_user_qr_code(
+        message: Message,
+        state: FSMContext,
+        caption = "🔗 Вот ваша бонусная карточка с QR-кодом, для участия в программе:"
+    ):
     await state.update_data(
         tg_id=message.from_user.id,
         tg_username=message.from_user.username
     )
     user_data = await state.get_data()
-
-    caption = "🔗 Вот ваша бонусная карточка с QR-кодом, для участия в программе:"
 
     # Получаем QR-код из базы данных
     qrCode = await get_user_personal_qr_code(user_data)
@@ -28,13 +31,14 @@ async def send_user_qr_code(message: Message, state: FSMContext):
         photo = BufferedInputFile(qrCode, filename='qr_code.png')
 
         # Отправляем фото
-        await message.answer_photo(
-            photo=photo,
-            caption=caption,
-            show_caption_above_media=True,
-            disable_notification=True,
-            parse_mode='HTML'
-        )
+        await send_qr_code_to_client(message.from_user.id, caption, photo)
+        # await message.answer_photo(
+        #     photo=photo,
+        #     caption=caption,
+        #     show_caption_above_media=True,
+        #     disable_notification=True,
+        #     parse_mode='HTML'
+        # )
     else:
         await message.reply("QR-код не найден.")
 
