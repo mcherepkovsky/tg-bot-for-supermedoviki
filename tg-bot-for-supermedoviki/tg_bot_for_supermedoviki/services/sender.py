@@ -4,6 +4,7 @@ from aiogram import Bot
 from aiogram.types import BufferedInputFile
 
 from config_reader import config
+from services.message_deleter import delete_last_qr_msg
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -25,6 +26,8 @@ async def send_to(tg_id, message):
 
 
 async def send_qr_code_to_client(tg_id, caption, photo_bytes):
+    await delete_last_qr_msg(tg_id)
+
     try:
         photo = BufferedInputFile(photo_bytes, filename='qr_code.png')
 

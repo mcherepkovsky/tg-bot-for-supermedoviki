@@ -20,6 +20,24 @@ async def get_all_employees_from_db():
         return None
 
 
+async def get_last_qr_msg(tg_id):
+    try:
+        user = Users.get(tg_id=tg_id)
+        return user.last_msg
+    except Exception:
+        logger.error(f"Пользователь {tg_id} не найден.")
+        return None
+
+
+async def set_last_qr_msg(tg_id, msg_id):
+    try:
+        user = Users.get(tg_id=tg_id)
+        user.last_msg = msg_id
+        user.save()
+    except Exception:
+        logger.error(f"Пользователь {tg_id} не найден.")
+
+
 async def get_user_personal_qr_code(user_data):
     tg_id = user_data.get('tg_id')
     try:

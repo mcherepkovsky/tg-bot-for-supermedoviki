@@ -1,7 +1,7 @@
 from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
 
-from db.database_handler import get_user_personal_qr_code
+from db.database_handler import get_user_personal_qr_code, set_last_qr_msg
 from aiogram.types import Message
 from keyboards.simple_row import make_row_inline_keyboard_mutiple, make_row_inline_keyboard, menu_keyboard
 from config_reader import config, menu_data
@@ -28,6 +28,7 @@ async def send_user_qr_code(
     if qrCode:
         # Отправляем фото
         await send_qr_code_to_client(message.from_user.id, caption, qrCode)
+        await set_last_qr_msg(message.from_user.id, message.message_id)
     else:
         await message.reply("QR-код не найден.")
 

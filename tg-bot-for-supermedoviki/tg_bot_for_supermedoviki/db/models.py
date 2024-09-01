@@ -27,3 +27,4 @@ class Users(BaseModel):
     tg_username = CharField(null=True)
     personalQRCode = BlobField()
     coffe_number = IntegerField(default=0)
+    last_msg = IntegerField()

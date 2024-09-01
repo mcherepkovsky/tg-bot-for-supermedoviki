@@ -10,7 +10,7 @@ from keyboards.simple_row import client_keyboard, admin_keyboard
 from services.message_deleter import delete_messages
 from handlers.client import send_user_qr_code
 from db.database_handler import get_user_coffe_number
-from db.database_handler import update_coffe_number, update_user_qr
+from db.database_handler import update_coffe_number, update_user_qr, set_last_qr_msg
 from services.sender import send_qr_code_to_client
 
 common_router = Router()
@@ -53,6 +53,7 @@ async def start_message_main_admin(message: Message, state: FSMContext):
         coffe_number = await get_user_coffe_number(args[0])
         if coffe_number is not None:
             text = f"QR-код клиента <i>{args[0]}</i> <b>принят</b>.\nСтатус <b>{coffe_number + 1}/8</b> кофе."
+
             await update_coffe_number(args[0])
             # отправка карточки клиенту
             new_qr_image = await update_user_qr(args[0], coffe_number)
@@ -60,6 +61,7 @@ async def start_message_main_admin(message: Message, state: FSMContext):
             caption = await get_caption(coffe_number + 1)
 
             await send_qr_code_to_client(args[0], caption, new_qr_image)
+            await set_last_qr_msg(args[0], message.message_id)
 
             if coffe_number + 1 == 8:
                 text += "\n\n<b>Клиент воспользовался бесплатным кофе\медовиком!</b>"
@@ -67,6 +69,8 @@ async def start_message_main_admin(message: Message, state: FSMContext):
             text = f"Пользователь с ID <i>{args[0]}</i> не найден."
 
         await start_message_main_admin_null(message, text=text)
+    else:
+        await start_message_main_admin_null(message)
 
 
 async def get_caption(num):
