@@ -30,19 +30,9 @@ async def main():
     client_router.message.filter(RoleFilter(role='Client'))
     admin_router.message.filter(RoleFilter(role='Administrator'))
 
-    # @dp.message(Command(commands=["start"]))
-    # async def cmd_start(message: Message):
-    #     full_text = message.text
-    #     command, *args = full_text.split()
-    #
-    #     if args:
-    #         await message.answer(
-    #             text=args[0]
-    #         )
-
     await bot.delete_webhook(drop_pending_updates=True)
 
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, skip_updates=False)
 
 
 async def set_main_menu(bot: Bot):

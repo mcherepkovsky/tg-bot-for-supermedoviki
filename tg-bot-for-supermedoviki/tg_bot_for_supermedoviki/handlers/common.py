@@ -1,10 +1,9 @@
 import logging
-from io import BytesIO
 
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardRemove, InputFile, BufferedInputFile
+from aiogram.types import Message, ReplyKeyboardRemove
 
 from filtres.role_filter import RoleFilter
 from keyboards.simple_row import client_keyboard, admin_keyboard
@@ -44,17 +43,11 @@ async def cmd_start(message: Message, state: FSMContext):
     await start_message_main_admin(message, state)
 
 
-# async def start_message_main_client(message: Message):
-#     await message.answer(
-#         text=f"Вы находитесь в <b>Главном меню</b>.\nВыберите действие 👇",
-#         parse_mode='HTML',
-#         reply_markup=client_keyboard()
-#     )
-
-
 async def start_message_main_admin(message: Message, state: FSMContext):
     full_text = message.text
     command, *args = full_text.split()
+
+    await delete_messages(message.chat.id, [message.message_id])
 
     if args:
         coffe_number = await get_user_coffe_number(args[0])
@@ -63,13 +56,29 @@ async def start_message_main_admin(message: Message, state: FSMContext):
             await update_coffe_number(args[0])
             # отправка карточки клиенту
             new_qr_image = await update_user_qr(args[0], coffe_number)
-            caption = f"Ваша бонусная карточка успешно принята! 🎉\nНа данный момент у вас собрано <b>{coffe_number + 1} из 8</b> кофе.\n" \
-                      f"Еще немного, и вы сможете получить бесплатный напиток! 😍"
+
+            caption = await get_caption(coffe_number + 1)
+
             await send_qr_code_to_client(args[0], caption, new_qr_image)
+
+            if coffe_number + 1 == 8:
+                text += "\n\n<b>Клиент воспользовался бесплатным кофе\медовиком!</b>"
         else:
             text = f"Пользователь с ID <i>{args[0]}</i> не найден."
 
         await start_message_main_admin_null(message, text=text)
+
+
+async def get_caption(num):
+    if num == 7:
+        caption = "🎉 <b>Поздравляем!</b> Вы накопили 7 чашек кофе, и теперь можете получить 8-й кофе или медовик совершенно <b>бесплатно</b>!🥳\n\n" \
+                  "📍 Просто покажите этот QR-код на кассе в одном из наших кафе:"
+    elif num == 8:
+        caption = "☕️ Спасибо, что воспользовались своей бонусной чашкой кофе или медовиком! Мы рады, что вы с нами! 🎂\n\n" \
+                  "💳 Вы можете продолжать собирать отметки и получать ещё больше вкусных подарков. Желаем вам приятных посещений и ждём снова в <b>Super Medovik</b>!"
+    else:
+        caption = f"Ваша бонусная карточка успешно принята!🎉\nНа данный момент у вас собрано <b>{num} из 8</b> кофе.😍"
+    return caption
 
 
 async def start_message_main_admin_null(message: Message, text=f"Вы находитесь в <b>Главном меню</b>."):

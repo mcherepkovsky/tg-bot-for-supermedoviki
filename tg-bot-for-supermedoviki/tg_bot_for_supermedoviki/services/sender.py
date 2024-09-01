@@ -1,8 +1,7 @@
 import logging
-from io import BytesIO
 
 from aiogram import Bot
-from aiogram.types import InputFile, BufferedInputFile
+from aiogram.types import BufferedInputFile
 
 from config_reader import config
 
@@ -31,7 +30,7 @@ async def send_qr_code_to_client(tg_id, caption, photo_bytes):
 
         await bot.send_photo(
             chat_id=tg_id,
-            photo=photo,  # Assuming photo is a file ID or URL
+            photo=photo,
             caption=caption,
             parse_mode='HTML',
             disable_notification=True,

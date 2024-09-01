@@ -62,17 +62,22 @@ async def update_user_qr(tg_id, coffe_number):
         # Поиск пользователя по tg_id
         user = Users.get(tg_id=tg_id)
         if user:
-            # Генерация нового QR-кода
-            logger.error(type(user.personalQRCode))
-            image_bytes = user.personalQRCode.tobytes()
-            image_stream = BytesIO(image_bytes)
-            old_qr_image = Image.open(image_stream)
-            new_qr_image = AddMark.generate(tg_id, coffe_number,  old_qr_image)
+            if coffe_number + 1 != 8:
+                # Генерация нового QR-кода
+                image_bytes = user.personalQRCode.tobytes()
+                image_stream = BytesIO(image_bytes)
+                old_qr_image = Image.open(image_stream)
+                new_qr_image = AddMark.generate(tg_id, coffe_number, old_qr_image)
 
-            # Обновление QR-кода пользователя
-            user.personalQRCode = new_qr_image
-            user.save()  # Сохранение изменений в базе данных
-            logger.info(f"QR-код для пользователя {tg_id} успешно обновлен.")
+                # Обновление QR-кода пользователя
+                user.personalQRCode = new_qr_image
+                user.save()  # Сохранение изменений в базе данных
+                logger.info(f"QR-код для пользователя {tg_id} успешно обновлен.")
+            else:
+                new_qr_image = QRGen.generate(id=tg_id)
+                user.personalQRCode = new_qr_image
+                user.save()  # Сохранение изменений в базе данных
+                logger.info(f"QR-код для пользователя {tg_id} успешно обновлен.")
             return new_qr_image
         else:
             logger.error(f"Пользователь с tg_id {tg_id} не найден.")
@@ -86,7 +91,10 @@ async def update_coffe_number(tg_id):
     try:
         user = Users.get(Users.tg_id == tg_id)
 
-        user.coffe_number += 1
+        if user.coffe_number < 7:
+            user.coffe_number += 1
+        else:
+            user.coffe_number = 0
         user.save()
 
         logger.info(f"Coffe_number пользователя {tg_id} успешно обновлён на '{user.coffe_number}'.")

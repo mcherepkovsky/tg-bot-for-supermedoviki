@@ -1,7 +1,6 @@
 import logging
 from io import BytesIO
 from random import randint
-from typing import io
 
 from PIL import Image
 
@@ -17,7 +16,7 @@ class AddMark:
 
     def position_mark(self):
         """Определяет позицию для метки на фоновой картинке. (1325,655) старт, растояние 140"""
-        if 4 > self.coffe_number > 0:
+        if 4 > self.coffe_number >= 0:
             self.position = (1325 + 140 * self.coffe_number, 655)
         elif 8 > self.coffe_number > 3:
             self.position = (1325 + 140 * (self.coffe_number - 4), 795)
@@ -43,10 +42,8 @@ class AddMark:
         add_mark.rotate_mark()
         add_mark.position_mark()
         add_mark.add_mark()
-        # add_mark.user_card.save(f"result_card_{user_id}.png")
         return add_mark.save_image()
 
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-# AddMark.generate(12345)
